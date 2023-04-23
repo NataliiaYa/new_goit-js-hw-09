@@ -11,10 +11,9 @@ const minutes = document.querySelector("[data-minutes]");
 const seconds = document.querySelector("[data-seconds]");
 
 const TIMER_DELAY = 1000;
-let intervalId = null;
+startBtn.addEventListener('click', onBtnStart);
 startBtn.disabled = true;
-let selectedDate;
-// startBtn.addEventListener("click", startTimer);
+let intervalId = null;
 
 const options = {
     enableTime: true, //вмикає спосіб вибору часу
@@ -22,75 +21,20 @@ const options = {
     defaultDate: new Date(), //Встановлює початкові вибрані дати.
     minuteIncrement: 1, //Регулює крок для введення хвилин (включно з прокручуванням)
     onClose(selectedDates) { //Функції, які запускаються щоразу, коли календар закривається
-        console.log(selectedDates[0]);
-        // const currentDate = new Date(); 
+        // console.log(selectedDates[0]);
+    futureTime = selectedDates[0].getTime(); 
     
-        if (selectedDates[0] < Date.now()) {
-            Notify.warning("Please choose a date in the future",
-            {
-                timeout: 5000,
-                width: "500px",
-                fontSize: "25px",
-                position: "center-center"
-            },);
-        // startBtn.disabled = false; //активна кнопка
-
+        if (selectedDates[0] <= options.defaultDate) {
+            startBtn.disabled = true; // неактивна кнопка
+            Notiflix.Notify.failure('Please choose a date in the future');
         } else {
-            startBtn.disabled = true; //неактивна кнопка
-            selectedDate = selectedDates[0];
-            // Notify.warning("Please choose a date in the future",
-            // {
-            //     timeout: 5000,
-            //     width: "500px",
-            //     fontSize: "25px",
-            //     position: "center-center"
-            // },);
+            startBtn.disabled = false; //активна кнопка
+            return futureTime;
         }
     },
 };
 // використовуємо функціонал бібліотеки 
 const dates = flatpickr(input, options);
-// функція початку відліку
-startBtn.addEventListener("click", startTimer);
-function startTimer() {
-    // const selectedDate = dates.selectedDates[0]
-    startBtn.disabled = true;
-    // input.disabled = true;
-    intervalId = setInterval(() => {
-        const currentTime = selectedDate - Date.now(); // поточна дата
-        // const deltaTime = selectedDate - currentTime; //зворотній відлік
-        // const time = convertMs(deltaTime);
-        // startBtn.disabled = true;
-        
-        updateTimer(time);
-
-        if (currentTime <= 0) {
-        clearInterval(intervalId);
-
-        // days.textContent = "00";
-        // hours.textContent = "00";
-        // minutes.textContent = "00";
-        // seconds.textContent = "00";
-        } else {
-            days.textContent = convertMs(difference).days;
-            hours.textContent = convertMs(difference).hours;
-            minutes.textContent = convertMs(difference).minutes;
-            seconds.textContent = convertMs(difference).seconds;
-        }
-    }, TIMER_DELAY);
-};
-
-// function updateTimer(data) {
-//     days.textContent = `${data.days}`;
-//     hours.textContent = `${data.hours}`;
-//     minutes.textContent = `${data.minutes}`;
-//     seconds.textContent = `${data.seconds}`;
-// };
-
-function addLeadingZero(number) {
-  const numberToString = number.toString();
-  return numberToString.padStart(2, '0');
-}
 
 function convertMs(ms) {
     const second = 1000;
@@ -104,4 +48,39 @@ function convertMs(ms) {
     const seconds = addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
 
     return { days, hours, minutes, seconds };
+};
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+};
+// функція початку відліку
+// startBtn.addEventListener("click", startTimer);
+function onBtnStart() {
+    // const selectedDate = dates.selectedDates[0]
+    // startBtn.disabled = true;
+    // input.disabled = true;
+    intervalId = setInterval(() => {
+        const currentTime = Date.now(); // поточна дата
+        const deltaTime = futureTime - currentTime; //зворотній відлік
+        // const time = convertMs(deltaTime);
+        // startBtn.disabled = true;
+        
+        // updateTimer(time);
+
+        if (deltaTime < 0) {
+            return
+        // clearInterval(intervalId);
+
+        // days.textContent = "00";
+        // hours.textContent = "00";
+        // minutes.textContent = "00";
+        // seconds.textContent = "00";
+        } else {
+            const {days, hours, minutes, seconds } = convertMs(remainingTime);
+            days.textContent = addLeadingZero(days);
+            hours.textContent = addLeadingZero(hours);
+            minutes.textContent = addLeadingZero(minutes);
+            seconds.textContent = addLeadingZero(seconds);
+        }
+    }, TIMER_DELAY);
 };
