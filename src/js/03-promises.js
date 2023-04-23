@@ -20,8 +20,8 @@ function createPromise(position, delay) {
         reject({ position, delay });
     // Reject
   }
-  }, delay)
-
+    }, delay)
+    
     })
 }
 // створюємо функцію submit
@@ -31,17 +31,24 @@ function onSubmitForm(evt) {
   //присвоюємо числові значення
   let delayValue = Number(delay.value);
   let stepValue = Number(step.value);
-  let amountValue = Number(step.value);
+  let amountValue = Number(amount.value);
 
   for (let i = 1; i <= amountValue; i += 1) {
-    createPromise(i, delayValue)
-      .then(({ position, delay }) => {
-        Notify.success(`Fulfilled promise ${position} in ${delay}ms`, {
-          width: '400px',
-          fontSize: '20px',
-        },);
-      });
-    delayValue += stepValue;
-  }
+
+      createPromise(i, delayValue)
+        .then(({ position, delay }) => {
+          Notify.success(`Fulfilled promise ${position} in ${delay}ms`, {
+            width: '400px',
+            fontSize: '20px',
+          },);
+        })
+        .catch(({ position, delay }) => {
+          Notify.failure(`Rejected promise ${position} in ${delay}ms`, {
+            width: '400px',
+            fontSize: '20px',
+          },);
+        });
+      delayValue += stepValue;
+    }
   form.reset();
 }
